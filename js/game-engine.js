@@ -277,10 +277,10 @@ class GameEngine {
         if (hpBar && hpText && this.boss) {
             const percentage = gameConfig.getBossHPPercentage();
             hpBar.style.width = `${percentage}%`;
-            hpText.textContent = `Boss: ${Math.ceil(percentage)}% (${this.boss.currentHP}/${this.boss.maxHP})`;
+            hpText.textContent = `${Math.ceil(percentage)}%`; // Just show percentage
             
             if (percentage <= 0) {
-                hpText.textContent = 'Boss: DEFEATED!';
+                hpText.textContent = 'DEFEATED!';
                 hpBar.style.background = '#00ff00';
             }
         }
