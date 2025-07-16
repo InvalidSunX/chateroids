@@ -12,6 +12,10 @@ class GameEngine {
         this.asteroids = [];
         this.bullets = [];
         
+        // Visual effects
+        this.bossFlashTime = 0;
+        this.shipFlashTime = 0;
+        
         // Game state
         this.gameStarted = false;
         this.bossDefeated = false;
@@ -43,7 +47,7 @@ class GameEngine {
         this.communityShip = new Ship(
             100, // Left side but visible
             50,  // Top area
-            'Community'
+            'Chat'
         );
         
         // Setup UI updates
@@ -138,6 +142,9 @@ class GameEngine {
             if (this.boss && !this.bossDefeated && 
                 this.circleCollision(bullet.position, 2, this.boss.position, this.boss.size)) {
                 
+                // Boss flash effect when hit
+                this.bossFlashTime = Date.now();
+                
                 const defeated = this.boss.takeDamage(bullet.damage);
                 if (defeated) {
                     this.bossDefeated = true;
@@ -174,14 +181,18 @@ class GameEngine {
         // Clear canvas (transparent for overlay)
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw boss (quarter visible in top right)
+        // Draw boss (quarter visible in top right) with flash effect
         if (this.boss && !this.bossDefeated) {
-            this.boss.draw(this.ctx);
+            // Check if boss should flash (white when hit)
+            const shouldFlash = Date.now() - this.bossFlashTime < 200; // Flash for 200ms
+            this.boss.draw(this.ctx, shouldFlash ? '#ffffff' : null);
         }
         
-        // Draw community ship (now visible)
+        // Draw community ship (now visible) with flash effect
         if (this.communityShip) {
-            this.communityShip.draw(this.ctx);
+            // Check if ship should flash purple when shooting
+            const shouldFlash = Date.now() - this.shipFlashTime < 150; // Flash for 150ms
+            this.communityShip.draw(this.ctx, shouldFlash ? '#9966ff' : null);
         }
         
         // Draw bullets (now visible)
@@ -207,12 +218,15 @@ class GameEngine {
             this.communityShip = new Ship(
                 100,
                 50,
-                'Community'
+                'Chat'
             );
         }
         
         // Fire bullet toward boss in top right corner
         if (this.boss && !this.bossDefeated) {
+            // Ship flash effect when shooting
+            this.shipFlashTime = Date.now();
+            
             // Calculate direction from ship to boss
             const angle = Math.atan2(
                 this.boss.position.y - this.communityShip.position.y,
@@ -247,7 +261,7 @@ class GameEngine {
             this.communityShip = new Ship(
                 gameConfig.gameWidth / 2,
                 gameConfig.gameHeight - 100,
-                'Community'
+                'Chat'
             );
         }
     }

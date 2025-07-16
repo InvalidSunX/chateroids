@@ -134,13 +134,13 @@ class Ship {
         this.velocity = new Vector2(0, 0);
     }
     
-    draw(ctx) {
+    draw(ctx, overrideColor = null) {
         if (!this.alive) return;
         
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.rotation);
-        ctx.strokeStyle = this.color;
+        ctx.strokeStyle = overrideColor || this.color;
         ctx.lineWidth = 2;
         
         // Draw triangle ship
@@ -153,7 +153,7 @@ class Ship {
         
         // Draw username
         ctx.restore();
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = overrideColor || this.color;
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(this.username, this.position.x, this.position.y - this.size - 5);
@@ -190,10 +190,10 @@ class Boss {
         return this.currentHP <= 0;
     }
     
-    draw(ctx) {
+    draw(ctx, overrideColor = null) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        ctx.strokeStyle = '#ff0000';
+        ctx.strokeStyle = overrideColor || '#ff0000';
         ctx.lineWidth = 3;
         
         // Draw circle boss
