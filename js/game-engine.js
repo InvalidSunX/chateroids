@@ -140,7 +140,7 @@ class GameEngine {
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const bullet = this.bullets[i];
             if (this.boss && !this.bossDefeated && 
-                this.circleCollision(bullet.position, 2, this.boss.position, this.boss.size)) {
+                this.circleCollision(bullet.position, 2, this.boss.position, this.boss.size / 2)) {
                 
                 // Boss flash effect when hit
                 this.bossFlashTime = Date.now();
@@ -209,6 +209,12 @@ class GameEngine {
             this.ctx.textAlign = 'center';
             this.ctx.fillText('BOSS DEFEATED!', this.canvas.width / 2, this.canvas.height / 2);
         }
+        
+        // Debug: Show bullet count (temporary)
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = '12px Arial';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText(`Bullets: ${this.bullets.length}`, 10, this.canvas.height - 20);
     }
     
     // Fire bullet from chat message

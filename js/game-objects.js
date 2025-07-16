@@ -227,7 +227,7 @@ class Bullet {
         this.velocity = velocity;
         this.owner = owner;
         this.damage = damage;
-        this.lifetime = 5000; // Increased to 5 seconds for longer distance travel
+        this.lifetime = 8000; // Increased to 8 seconds to ensure bullets reach the boss
         this.created = Date.now();
     }
     
@@ -237,8 +237,8 @@ class Bullet {
     }
     
     isOffScreen() {
-        // Give bullets more room to travel to reach edge-positioned boss
-        const margin = 100;
+        // Give bullets plenty of room to travel to reach edge-positioned boss
+        const margin = 200; // Increased margin for boss at screen edges
         return this.position.x < -margin || this.position.x > gameConfig.gameWidth + margin ||
                this.position.y < -margin || this.position.y > gameConfig.gameHeight + margin;
     }
