@@ -33,16 +33,16 @@ class GameEngine {
     }
     
     initializeGame() {
-        // Create boss in the top right corner
+        // Create boss in the top right corner (quarter visible)
         this.boss = new Boss();
-        // Position boss in top right, static position
-        this.boss.position.x = gameConfig.gameWidth - 80; // Near right edge
-        this.boss.position.y = 40; // Near top edge
+        // Position boss so only bottom-left quarter is visible
+        this.boss.position.x = gameConfig.gameWidth - (this.boss.size / 2); // Half off right edge
+        this.boss.position.y = this.boss.size / 2; // Half off top edge
         
-        // Create community ship (hidden but functional)
+        // Create community ship (now visible)
         this.communityShip = new Ship(
-            gameConfig.gameWidth * 0.1, // Far left side  
-            gameConfig.gameHeight * 0.5, // Middle of the 10% strip
+            100, // Left side but visible
+            50,  // Top area
             'Community'
         );
         
@@ -174,12 +174,17 @@ class GameEngine {
         // Clear canvas (transparent for overlay)
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw boss only
+        // Draw boss (quarter visible in top right)
         if (this.boss && !this.bossDefeated) {
             this.boss.draw(this.ctx);
         }
         
-        // Draw bullets
+        // Draw community ship (now visible)
+        if (this.communityShip) {
+            this.communityShip.draw(this.ctx);
+        }
+        
+        // Draw bullets (now visible)
         this.bullets.forEach(bullet => bullet.draw(this.ctx));
         
         // Draw minimal game info
@@ -197,18 +202,18 @@ class GameEngine {
     
     // Fire bullet from chat message
     fireBulletFromChat(username, damage) {
-        // Ensure community ship exists (invisible)
+        // Ensure community ship exists (now visible)
         if (!this.communityShip) {
             this.communityShip = new Ship(
-                gameConfig.gameWidth * 0.1,
-                gameConfig.gameHeight * 0.5,
+                100,
+                50,
                 'Community'
             );
         }
         
-        // Fire bullet toward boss in top right
+        // Fire bullet toward boss in top right corner
         if (this.boss && !this.bossDefeated) {
-            // Calculate direction from bottom left to top right boss
+            // Calculate direction from ship to boss
             const angle = Math.atan2(
                 this.boss.position.y - this.communityShip.position.y,
                 this.boss.position.x - this.communityShip.position.x
@@ -220,7 +225,7 @@ class GameEngine {
             );
             
             const bullet = new Bullet(
-                this.communityShip.position.x,
+                this.communityShip.position.x + this.communityShip.size,
                 this.communityShip.position.y,
                 bulletVel,
                 username,
@@ -229,7 +234,7 @@ class GameEngine {
             
             this.bullets.push(bullet);
             
-            // No visual feedback since ship is invisible
+            // Show visual feedback on ship
             this.communityShip.lastShooter = username;
             this.communityShip.lastShotTime = Date.now();
         }
@@ -287,10 +292,10 @@ class GameEngine {
         this.bullets = [];
         this.bossDefeated = false;
         
-        // Reset boss to top right corner
+        // Reset boss to top right corner (quarter visible)
         this.boss = new Boss();
-        this.boss.position.x = gameConfig.gameWidth - 80;
-        this.boss.position.y = 40;
+        this.boss.position.x = gameConfig.gameWidth - (this.boss.size / 2);
+        this.boss.position.y = this.boss.size / 2;
         gameConfig.bossCurrentHP = gameConfig.bossMaxHP;
         
         // Update UI

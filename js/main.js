@@ -169,6 +169,12 @@ function connectToTwitchChat(streamerName, bossMaxHP) {
     // Reset game state for new connection
     gameEngine.reset();
     
+    // Hide config UI after successful connection
+    const configPanel = document.getElementById('config-panel');
+    const showConfigBtn = document.getElementById('show-config');
+    if (configPanel) configPanel.classList.add('hidden');
+    if (showConfigBtn) showConfigBtn.style.display = 'none';
+    
     // Enable auto-save by default
     upgradeSystem.enableAutoSave();
     
