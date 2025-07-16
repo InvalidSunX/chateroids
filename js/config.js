@@ -10,7 +10,7 @@ class Config {
         // Game settings
         this.asteroidCount = 8;
         this.shipSpeed = 5;
-        this.bulletSpeed = 7;
+        this.bulletSpeed = 15; // Increased for longer distance travel
         this.asteroidSpeed = 2;
         
         this.loadFromStorage();
