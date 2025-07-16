@@ -84,7 +84,20 @@ class UpgradeSystem {
         this.userLevels.set(username, newLevel);
         
         console.log(`${username} leveled up to ${newLevel}!`);
+        
+        // Send level-up notification to Twitch chat
+        this.sendLevelUpNotification(username, newLevel);
+        
         return newLevel;
+    }
+    
+    // Send level-up notification to Twitch chat
+    sendLevelUpNotification(username, newLevel) {
+        if (window.twitchAPI && window.twitchAPI.canSendMessages) {
+            const damage = this.calculateDamage(username);
+            const message = `🎉 ${username} leveled up to Level ${newLevel}! Damage: ${damage} 🚀`;
+            window.twitchAPI.sendMessage(message);
+        }
     }
     
     // Get available upgrades for a user's level

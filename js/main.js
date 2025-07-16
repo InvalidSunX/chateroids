@@ -36,10 +36,19 @@ function setupUIHandlers() {
     connectBtn.addEventListener('click', () => {
         const streamerName = document.getElementById('streamer-name').value.trim();
         const bossMaxHP = document.getElementById('boss-max-hp').value;
+        const botUsername = document.getElementById('bot-username').value.trim();
+        const botOAuth = document.getElementById('bot-oauth').value.trim();
         
         if (!streamerName) {
             alert('Please enter a streamer username');
             return;
+        }
+        
+        // Configure bot credentials if provided
+        if (botUsername && botOAuth) {
+            // Remove 'oauth:' prefix if user included it
+            const cleanOAuth = botOAuth.replace(/^oauth:/, '');
+            twitchAPI.configureBotCredentials(botUsername, cleanOAuth);
         }
         
         connectToTwitchChat(streamerName, bossMaxHP);
