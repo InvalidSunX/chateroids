@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive Twitch Chat Asteroids Game - Viewers level up and battle a boss together through chat messages">
+    <meta name="keywords" content="twitch, streaming, overlay, game, asteroids, chat, interactive">
+    <meta name="author" content="Chateroids Project">
+    <title>Chateroids - Twitch Chat Asteroids Overlay</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-overlay">
+            <div id="chat-display"></div>
+            <div id="boss-hp-bar">
+                <div id="boss-hp-fill"></div>
+                <span id="boss-hp-text">Boss: 100%</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Configuration panel (hidden by default) -->
+    <div id="config-panel" class="hidden">
+        <h3>Chateroids Configuration</h3>
+        <input type="text" id="streamer-name" placeholder="Enter streamer username">
+        <input type="number" id="boss-max-hp" placeholder="Boss Max HP" value="2000">
+        <small>Recommended: Level 1 damage (10) × 200 = 2000 HP</small>
+        <button id="connect-btn">Connect to Chat</button>
+        <button id="toggle-config">Hide Config</button>
+    </div>
+    
+    <button id="show-config" class="config-toggle">⚙️</button>
+    
+    <script src="js/config.js"></script>
+    <script src="js/twitch-api.js"></script>
+    <script src="js/game-objects.js"></script>
+    <script src="js/upgrade-system.js"></script>
+    <script src="js/chat-handler.js"></script>
+    <script src="js/game-engine.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
