@@ -127,11 +127,7 @@ class GameEngine {
         
         // Update bullets (no off-screen detection needed for stationary setup)
         this.bullets = this.bullets.filter(bullet => {
-            const stillAlive = bullet.update(deltaTime);
-            if (!stillAlive) {
-                console.log(`Bullet expired at position: ${Math.round(bullet.position.x)}, ${Math.round(bullet.position.y)}`);
-            }
-            return stillAlive; // Only check if bullet is still alive (lifetime)
+            return bullet.update(deltaTime); // Only check if bullet is still alive (lifetime)
         });
         
         // Check collisions
@@ -144,9 +140,6 @@ class GameEngine {
             const bullet = this.bullets[i];
             if (this.boss && !this.bossDefeated && 
                 this.circleCollision(bullet.position, 5, this.boss.position, this.boss.size)) {
-                
-                console.log(`Bullet hit boss at position: ${Math.round(bullet.position.x)}, ${Math.round(bullet.position.y)}`);
-                console.log(`Boss position: ${Math.round(this.boss.position.x)}, ${Math.round(this.boss.position.y)}`);
                 
                 // Boss flash effect when hit
                 this.bossFlashTime = Date.now();
@@ -216,21 +209,11 @@ class GameEngine {
             this.ctx.fillText('BOSS DEFEATED!', this.canvas.width / 2, this.canvas.height / 2);
         }
         
-        // Debug: Show bullet count and boss position (temporary)
+        // Debug: Show bullet count (temporary)
         this.ctx.fillStyle = '#ffffff';
         this.ctx.font = '12px Arial';
         this.ctx.textAlign = 'left';
-        this.ctx.fillText(`Bullets: ${this.bullets.length}`, 10, this.canvas.height - 40);
-        if (this.boss) {
-            this.ctx.fillText(`Boss: ${Math.round(this.boss.position.x)}, ${Math.round(this.boss.position.y)}`, 10, this.canvas.height - 20);
-        }
-        
-        // Debug: Show bullet positions
-        this.bullets.forEach((bullet, i) => {
-            if (i < 3) { // Only show first 3 bullets to avoid clutter
-                this.ctx.fillText(`B${i}: ${Math.round(bullet.position.x)}, ${Math.round(bullet.position.y)}`, 200, this.canvas.height - 40 + (i * 15));
-            }
-        });
+        this.ctx.fillText(`Bullets: ${this.bullets.length}`, 10, this.canvas.height - 20);
     }
     
     // Fire bullet from chat message
