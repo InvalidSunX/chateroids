@@ -12,10 +12,6 @@ class GameEngine {
         this.asteroids = [];
         this.bullets = [];
         
-        // Stars for background
-        this.stars = [];
-        this.generateStars();
-        
         // Game state
         this.gameStarted = false;
         this.bossDefeated = false;
@@ -37,21 +33,18 @@ class GameEngine {
     }
     
     initializeGame() {
-        // Create boss in the top area
+        // Create boss in the top right corner
         this.boss = new Boss();
-        // Position boss in the top 10% area
-        this.boss.position.x = gameConfig.gameWidth * 0.8; // Right side
-        this.boss.position.y = gameConfig.gameHeight * 0.5; // Middle of the 10% strip
+        // Position boss in top right, static position
+        this.boss.position.x = gameConfig.gameWidth - 80; // Near right edge
+        this.boss.position.y = 40; // Near top edge
         
-        // Create community ship in the top area
+        // Create community ship (hidden but functional)
         this.communityShip = new Ship(
-            gameConfig.gameWidth * 0.2, // Left side  
+            gameConfig.gameWidth * 0.1, // Far left side  
             gameConfig.gameHeight * 0.5, // Middle of the 10% strip
             'Community'
         );
-        
-        // Don't create asteroids for minimal overlay
-        // this.generateAsteroids();
         
         // Setup UI updates
         this.updateBossHPDisplay();
@@ -121,12 +114,9 @@ class GameEngine {
     }
     
     update(deltaTime) {
-        // Update boss
-        if (this.boss && !this.bossDefeated) {
-            this.boss.update(deltaTime);
-        }
+        // Boss stays static - no update needed
         
-        // Update community ship
+        // Update community ship (invisible but functional)
         if (this.communityShip) {
             this.communityShip.update(deltaTime);
         }
@@ -151,7 +141,7 @@ class GameEngine {
                 const defeated = this.boss.takeDamage(bullet.damage);
                 if (defeated) {
                     this.bossDefeated = true;
-                    chatHandler.showSystemMessage('🎉 BOSS DEFEATED! 🎉');
+                    // No system message - just defeat the boss silently
                     
                     // Award bonus XP to bullet owner
                     upgradeSystem.addExperience(bullet.owner, 50);
@@ -184,26 +174,9 @@ class GameEngine {
         // Clear canvas (transparent for overlay)
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw boss
+        // Draw boss only
         if (this.boss && !this.bossDefeated) {
             this.boss.draw(this.ctx);
-        }
-        
-        // Draw community ship
-        if (this.communityShip) {
-            this.communityShip.draw(this.ctx);
-            
-            // Show last shooter info
-            if (this.communityShip.lastShooter && Date.now() - this.communityShip.lastShotTime < 2000) {
-                this.ctx.fillStyle = '#00ff00';
-                this.ctx.font = '12px Arial';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText(
-                    `${this.communityShip.lastShooter} fired!`, 
-                    this.communityShip.position.x, 
-                    this.communityShip.position.y - 25
-                );
-            }
         }
         
         // Draw bullets
@@ -224,24 +197,30 @@ class GameEngine {
     
     // Fire bullet from chat message
     fireBulletFromChat(username, damage) {
-        // Ensure community ship exists
+        // Ensure community ship exists (invisible)
         if (!this.communityShip) {
             this.communityShip = new Ship(
-                gameConfig.gameWidth * 0.2,
+                gameConfig.gameWidth * 0.1,
                 gameConfig.gameHeight * 0.5,
                 'Community'
             );
         }
         
-        // Fire bullet from community ship toward boss (horizontal)
+        // Fire bullet toward boss in top right
         if (this.boss && !this.bossDefeated) {
+            // Calculate direction from bottom left to top right boss
+            const angle = Math.atan2(
+                this.boss.position.y - this.communityShip.position.y,
+                this.boss.position.x - this.communityShip.position.x
+            );
+            
             const bulletVel = new Vector2(
-                gameConfig.bulletSpeed, // Move right toward boss
-                0 // No vertical movement
+                Math.cos(angle) * gameConfig.bulletSpeed,
+                Math.sin(angle) * gameConfig.bulletSpeed
             );
             
             const bullet = new Bullet(
-                this.communityShip.position.x + this.communityShip.size,
+                this.communityShip.position.x,
                 this.communityShip.position.y,
                 bulletVel,
                 username,
@@ -250,7 +229,7 @@ class GameEngine {
             
             this.bullets.push(bullet);
             
-            // Show visual feedback on ship
+            // No visual feedback since ship is invisible
             this.communityShip.lastShooter = username;
             this.communityShip.lastShotTime = Date.now();
         }
@@ -308,17 +287,16 @@ class GameEngine {
         this.bullets = [];
         this.bossDefeated = false;
         
-        // Reset boss
+        // Reset boss to top right corner
         this.boss = new Boss();
+        this.boss.position.x = gameConfig.gameWidth - 80;
+        this.boss.position.y = 40;
         gameConfig.bossCurrentHP = gameConfig.bossMaxHP;
-        
-        // Reset asteroids
-        this.generateAsteroids();
         
         // Update UI
         this.updateBossHPDisplay();
         
-        chatHandler.showSystemMessage('🔄 Game Reset! New boss spawned!');
+        // No system message for minimal overlay
     }
 }
 
