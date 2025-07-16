@@ -125,10 +125,9 @@ class GameEngine {
             this.communityShip.update(deltaTime);
         }
         
-        // Update bullets
+        // Update bullets (no off-screen detection needed for stationary setup)
         this.bullets = this.bullets.filter(bullet => {
-            const alive = bullet.update(deltaTime);
-            return alive && !bullet.isOffScreen();
+            return bullet.update(deltaTime); // Only check if bullet is still alive (lifetime)
         });
         
         // Check collisions
@@ -136,11 +135,11 @@ class GameEngine {
     }
     
     checkCollisions() {
-        // Bullet vs Boss only (minimal overlay)
+        // Bullet vs Boss only (minimal overlay) - generous collision for stationary boss
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const bullet = this.bullets[i];
             if (this.boss && !this.bossDefeated && 
-                this.circleCollision(bullet.position, 2, this.boss.position, this.boss.size / 2)) {
+                this.circleCollision(bullet.position, 5, this.boss.position, this.boss.size)) {
                 
                 // Boss flash effect when hit
                 this.bossFlashTime = Date.now();

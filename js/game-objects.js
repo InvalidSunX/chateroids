@@ -227,20 +227,13 @@ class Bullet {
         this.velocity = velocity;
         this.owner = owner;
         this.damage = damage;
-        this.lifetime = 8000; // Increased to 8 seconds to ensure bullets reach the boss
+        this.lifetime = 4000; // 4 seconds is plenty for stationary targets
         this.created = Date.now();
     }
     
     update(deltaTime) {
         this.position.add(this.velocity.clone().multiply(deltaTime / 16));
         return Date.now() - this.created < this.lifetime;
-    }
-    
-    isOffScreen() {
-        // Give bullets plenty of room to travel to reach edge-positioned boss
-        const margin = 200; // Increased margin for boss at screen edges
-        return this.position.x < -margin || this.position.x > gameConfig.gameWidth + margin ||
-               this.position.y < -margin || this.position.y > gameConfig.gameHeight + margin;
     }
     
     draw(ctx) {
