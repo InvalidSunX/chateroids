@@ -12,6 +12,10 @@ class GameEngine {
         this.asteroids = [];
         this.bullets = [];
         
+        // Stars for background
+        this.stars = [];
+        this.generateStars();
+        
         // Game state
         this.gameStarted = false;
         this.bossDefeated = false;
@@ -33,11 +37,21 @@ class GameEngine {
     }
     
     initializeGame() {
-        // Create boss
+        // Create boss in the top area
         this.boss = new Boss();
+        // Position boss in the top 10% area
+        this.boss.position.x = gameConfig.gameWidth * 0.8; // Right side
+        this.boss.position.y = gameConfig.gameHeight * 0.5; // Middle of the 10% strip
         
-        // Create initial asteroids
-        this.generateAsteroids();
+        // Create community ship in the top area
+        this.communityShip = new Ship(
+            gameConfig.gameWidth * 0.2, // Left side  
+            gameConfig.gameHeight * 0.5, // Middle of the 10% strip
+            'Community'
+        );
+        
+        // Don't create asteroids for minimal overlay
+        // this.generateAsteroids();
         
         // Setup UI updates
         this.updateBossHPDisplay();
@@ -59,6 +73,18 @@ class GameEngine {
             );
             
             this.asteroids.push(new Asteroid(x, y, 20 + Math.random() * 20));
+        }
+    }
+    
+    generateStars() {
+        this.stars = [];
+        for (let i = 0; i < 150; i++) {
+            this.stars.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                size: Math.random() * 2 + 0.5,
+                brightness: Math.random() * 0.8 + 0.2
+            });
         }
     }
     
@@ -111,20 +137,12 @@ class GameEngine {
             return alive && !bullet.isOffScreen();
         });
         
-        // Update asteroids
-        this.asteroids.forEach(asteroid => asteroid.update(deltaTime));
-        
         // Check collisions
         this.checkCollisions();
-        
-        // Respawn asteroids if needed
-        if (this.asteroids.length < gameConfig.asteroidCount / 2) {
-            this.generateAsteroids();
-        }
     }
     
     checkCollisions() {
-        // Bullet vs Boss
+        // Bullet vs Boss only (minimal overlay)
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const bullet = this.bullets[i];
             if (this.boss && !this.bossDefeated && 
@@ -135,41 +153,13 @@ class GameEngine {
                     this.bossDefeated = true;
                     chatHandler.showSystemMessage('🎉 BOSS DEFEATED! 🎉');
                     
-                    // Award bonus points to bullet owner
-                    upgradeSystem.addPoints(bullet.owner, 500);
+                    // Award bonus XP to bullet owner
+                    upgradeSystem.addExperience(bullet.owner, 50);
                 }
                 
                 this.bullets.splice(i, 1);
                 this.updateBossHPDisplay();
                 continue;
-            }
-            
-            // Bullet vs Asteroids
-            for (let j = this.asteroids.length - 1; j >= 0; j--) {
-                const asteroid = this.asteroids[j];
-                if (this.circleCollision(bullet.position, 2, asteroid.position, asteroid.size)) {
-                    // Split asteroid
-                    const newAsteroids = asteroid.split();
-                    this.asteroids.splice(j, 1);
-                    this.asteroids.push(...newAsteroids);
-                    
-                    // Award points to shooter
-                    upgradeSystem.addPoints(bullet.owner, 10);
-                    
-                    this.bullets.splice(i, 1);
-                    break;
-                }
-            }
-        }
-        
-        // Ship vs Asteroids
-        if (this.communityShip && this.communityShip.alive) {
-            for (const asteroid of this.asteroids) {
-                if (this.circleCollision(this.communityShip.position, this.communityShip.size, asteroid.position, asteroid.size)) {
-                    // Community ship hit - maybe show damage effect but don't destroy
-                    console.log('Community ship hit by asteroid');
-                    break;
-                }
             }
         }
     }
@@ -181,8 +171,17 @@ class GameEngine {
         return distance < radius1 + radius2;
     }
     
+    drawStars() {
+        this.stars.forEach(star => {
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness})`;
+            this.ctx.beginPath();
+            this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
+    }
+    
     render() {
-        // Clear canvas
+        // Clear canvas (transparent for overlay)
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Draw boss
@@ -207,33 +206,17 @@ class GameEngine {
             }
         }
         
-        // Draw asteroids
-        this.asteroids.forEach(asteroid => asteroid.draw(this.ctx));
-        
         // Draw bullets
         this.bullets.forEach(bullet => bullet.draw(this.ctx));
         
-        // Draw game info
-        this.drawGameInfo();
+        // Draw minimal game info
+        this.drawMinimalGameInfo();
     }
     
-    drawGameInfo() {
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        this.ctx.font = '14px Arial';
-        this.ctx.textAlign = 'left';
-        
-        let y = 20;
-        this.ctx.fillText(`Community Ship Active: ${this.communityShip ? 'Yes' : 'No'}`, 20, y);
-        y += 20;
-        this.ctx.fillText(`Asteroids: ${this.asteroids.length}`, 20, y);
-        y += 20;
-        this.ctx.fillText(`Bullets: ${this.bullets.length}`, 20, y);
-        y += 20;
-        this.ctx.fillText(`Recommended Boss HP: ${upgradeSystem.getRecommendedBossHP()}`, 20, y);
-        
+    drawMinimalGameInfo() {
         if (this.bossDefeated) {
             this.ctx.fillStyle = '#00ff00';
-            this.ctx.font = 'bold 24px Arial';
+            this.ctx.font = 'bold 16px Arial';
             this.ctx.textAlign = 'center';
             this.ctx.fillText('BOSS DEFEATED!', this.canvas.width / 2, this.canvas.height / 2);
         }
@@ -241,29 +224,24 @@ class GameEngine {
     
     // Fire bullet from chat message
     fireBulletFromChat(username, damage) {
-        // Get or create a single community ship
+        // Ensure community ship exists
         if (!this.communityShip) {
             this.communityShip = new Ship(
-                gameConfig.gameWidth / 2,
-                gameConfig.gameHeight - 100,
+                gameConfig.gameWidth * 0.2,
+                gameConfig.gameHeight * 0.5,
                 'Community'
             );
         }
         
-        // Fire bullet from community ship toward boss
+        // Fire bullet from community ship toward boss (horizontal)
         if (this.boss && !this.bossDefeated) {
-            const angle = Math.atan2(
-                this.boss.position.y - this.communityShip.position.y,
-                this.boss.position.x - this.communityShip.position.x
-            );
-            
             const bulletVel = new Vector2(
-                Math.cos(angle) * gameConfig.bulletSpeed,
-                Math.sin(angle) * gameConfig.bulletSpeed
+                gameConfig.bulletSpeed, // Move right toward boss
+                0 // No vertical movement
             );
             
             const bullet = new Bullet(
-                this.communityShip.position.x,
+                this.communityShip.position.x + this.communityShip.size,
                 this.communityShip.position.y,
                 bulletVel,
                 username,

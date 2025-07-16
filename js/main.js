@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('game-canvas');
     window.gameEngine = new GameEngine(canvas);
     
+    // Start the game immediately
+    gameEngine.start();
+    
     // Setup UI event handlers
     setupUIHandlers();
     
@@ -195,6 +198,33 @@ function updateConnectionStatus(connected, streamerName = '') {
         connectBtn.disabled = false;
     }
 }
+
+// Update stats panel display
+function updateStatsPanel() {
+    const levelDisplay = document.getElementById('level-display');
+    const xpDisplay = document.getElementById('xp-display');
+    const damageDisplay = document.getElementById('damage-display');
+    const upgradesDisplay = document.getElementById('upgrades-display');
+    
+    if (levelDisplay) {
+        const currentLevel = upgradeSystem.getCommunityLevel();
+        const currentXP = upgradeSystem.getCommunityXP();
+        const xpForNext = upgradeSystem.getXPRequiredForLevel(currentLevel + 1);
+        const currentLevelXP = upgradeSystem.getXPRequiredForLevel(currentLevel);
+        const xpProgress = currentXP - currentLevelXP;
+        const xpNeeded = xpForNext - currentLevelXP;
+        
+        levelDisplay.textContent = `Level: ${currentLevel}`;
+        xpDisplay.textContent = `XP: ${xpProgress}/${xpNeeded}`;
+        damageDisplay.textContent = `Damage: ${upgradeSystem.getBaseDamage()}`;
+        
+        const upgradeCount = Object.keys(upgradeSystem.upgrades).length;
+        upgradesDisplay.textContent = `Upgrades: ${upgradeCount}`;
+    }
+}
+
+// Start stats update interval
+setInterval(updateStatsPanel, 1000);
 
 // Add some keyboard controls for testing/demo purposes
 document.addEventListener('keydown', (e) => {

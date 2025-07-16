@@ -15,7 +15,9 @@ body {
 #game-container {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    height: 10vh; /* Only top 10% of screen */
+    top: 0;
+    left: 0;
 }
 
 #game-canvas {
@@ -36,12 +38,7 @@ body {
 }
 
 #chat-display {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    max-width: 300px;
-    max-height: 200px;
-    overflow: hidden;
+    display: none; /* Hidden for minimal overlay */
 }
 
 .chat-message {
@@ -62,14 +59,14 @@ body {
 
 #boss-hp-bar {
     position: absolute;
-    top: 20px;
+    bottom: 5px;
     left: 50%;
     transform: translateX(-50%);
-    width: 400px;
-    height: 30px;
+    width: 200px;
+    height: 15px;
     background: rgba(0, 0, 0, 0.7);
-    border: 2px solid #fff;
-    border-radius: 15px;
+    border: 1px solid #fff;
+    border-radius: 10px;
     overflow: hidden;
 }
 
@@ -93,15 +90,15 @@ body {
 /* Configuration Panel */
 #config-panel {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 20px;
+    right: 20px;
     background: rgba(0, 0, 0, 0.9);
     padding: 20px;
     border-radius: 10px;
     border: 2px solid #fff;
     z-index: 100;
     pointer-events: all;
+    min-width: 250px;
 }
 
 #config-panel.hidden {
@@ -181,3 +178,21 @@ body {
     color: #00ff00;
     font-weight: bold;
 }
+
+/* Stats Panel */
+#stats-panel {
+    display: none; /* Hidden for minimal overlay */
+}
+
+#stats-panel h4 {
+    margin-bottom: 10px;
+    text-align: center;
+    color: #ffffff;
+}
+
+#stats-panel div {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+/* Boss HP Bar */
