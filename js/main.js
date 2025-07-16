@@ -140,10 +140,14 @@ function connectToTwitchChat(streamerName, bossMaxHP) {
     gameConfig.updateStreamerName(streamerName);
     gameConfig.updateBossMaxHP(bossMaxHP);
     
-    // Try to load existing viewer data for this streamer
-    upgradeSystem.load().catch(() => {
-        console.log('No existing save file found, starting fresh');
-    });
+    // Try to load existing viewer data for this streamer (but don't block on it)
+    try {
+        upgradeSystem.load().catch((error) => {
+            console.log('No existing save file found or loading failed:', error);
+        });
+    } catch (error) {
+        console.log('Load function not available, starting fresh');
+    }
     
     // Connect to Twitch chat
     if (twitchAPI.isConnected()) {
@@ -168,9 +172,9 @@ function connectToTwitchChat(streamerName, bossMaxHP) {
     // Update UI
     updateConnectionStatus(true, streamerName);
     chatHandler.showSystemMessage(`🎮 Connected to ${streamerName}'s chat!`);
-    chatHandler.showSystemMessage('💬 Type in chat to damage the boss and earn points!');
-    chatHandler.showSystemMessage('⚡ Use !upgrade <type> to buy upgrades (speed, damage, shield, multishot)');
-    chatHandler.showSystemMessage('📊 Use !stats to see your progress, !help for more commands');
+    chatHandler.showSystemMessage('💬 Type in chat to damage the boss and earn XP!');
+    chatHandler.showSystemMessage('🆙 Level up to choose from 3 random upgrades!');
+    chatHandler.showSystemMessage('� Use !choose 1-3 to select upgrades, !stats for progress');
     chatHandler.showSystemMessage('💾 Viewer progress auto-saves to file every 30 seconds');
     
     // Hide config panel
@@ -267,11 +271,15 @@ window.addEventListener('error', (e) => {
             try {
                 gameEngine.stop();
                 window.gameEngine = new GameEngine(document.getElementById('game-canvas'));
-                gameEngine.start();
-                chatHandler.showSystemMessage('⚠️ Game recovered from error');
+                if (gameConfig.streamerName) {
+                    gameEngine.start();
+                    chatHandler.showSystemMessage('⚠️ Game recovered from error');
+                }
             } catch (recoveryError) {
                 console.error('Failed to recover:', recoveryError);
-                chatHandler.showSystemMessage('❌ Game error - please refresh the page');
+                if (chatHandler && chatHandler.showSystemMessage) {
+                    chatHandler.showSystemMessage('❌ Game error - please refresh the page');
+                }
             }
         }, 1000);
     }
@@ -281,10 +289,11 @@ window.addEventListener('error', (e) => {
 setInterval(() => {
     if (gameEngine && gameEngine.running) {
         const stats = {
-            ships: gameEngine.ships.size,
+            communityShip: gameEngine.communityShip ? 'Active' : 'None',
             bullets: gameEngine.bullets.length,
             asteroids: gameEngine.asteroids.length,
-            bossHP: gameConfig.getBossHPPercentage().toFixed(1)
+            bossHP: gameConfig.getBossHPPercentage().toFixed(1),
+            connectedUsers: upgradeSystem.userLevels.size
         };
         
         console.log('Game stats:', stats);
