@@ -285,6 +285,14 @@ class ChatHandler {
             }
         }
     }
+    
+    // Get the most recent active user (for stats display)
+    getMostRecentActiveUser() {
+        if (this.recentMessages.length > 0) {
+            return this.recentMessages[0].username;
+        }
+        return null;
+    }
 }
 
 // Initialize global chat handler

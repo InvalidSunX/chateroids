@@ -213,19 +213,25 @@ function updateStatsPanel() {
     const upgradesDisplay = document.getElementById('upgrades-display');
     
     if (levelDisplay) {
-        const currentLevel = upgradeSystem.getCommunityLevel();
-        const currentXP = upgradeSystem.getCommunityXP();
+        // Show stats for the most recent active user or highest level user
+        const mostRecentUser = chatHandler.getMostRecentActiveUser();
+        const highestLevelUser = upgradeSystem.getHighestLevelUser();
+        const displayUser = mostRecentUser || highestLevelUser || 'viewer';
+        
+        const currentLevel = upgradeSystem.getUserLevel(displayUser);
+        const currentXP = upgradeSystem.getUserExperience(displayUser);
         const xpForNext = upgradeSystem.getXPRequiredForLevel(currentLevel + 1);
         const currentLevelXP = upgradeSystem.getXPRequiredForLevel(currentLevel);
         const xpProgress = currentXP - currentLevelXP;
         const xpNeeded = xpForNext - currentLevelXP;
+        const userDamage = upgradeSystem.calculateDamage(displayUser);
         
-        levelDisplay.textContent = `Level: ${currentLevel}`;
+        levelDisplay.textContent = `${displayUser} - Level: ${currentLevel}`;
         xpDisplay.textContent = `XP: ${xpProgress}/${xpNeeded}`;
-        damageDisplay.textContent = `Damage: ${upgradeSystem.getBaseDamage()}`;
+        damageDisplay.textContent = `Damage: ${userDamage}`;
         
-        const upgradeCount = Object.keys(upgradeSystem.upgrades).length;
-        upgradesDisplay.textContent = `Upgrades: ${upgradeCount}`;
+        const userUpgrades = upgradeSystem.getUserUpgrades(displayUser);
+        upgradesDisplay.textContent = `Upgrades: ${userUpgrades.length}`;
     }
 }
 

@@ -407,6 +407,44 @@ class UpgradeSystem {
             this.autoSaveInterval = null;
         }
     }
+    
+    // Community functions for single-ship system
+    getCommunityLevel() {
+        // For community system, use the highest level among all users
+        let maxLevel = 1;
+        for (const level of this.userLevels.values()) {
+            maxLevel = Math.max(maxLevel, level);
+        }
+        return maxLevel;
+    }
+    
+    getCommunityXP() {
+        // For community system, return total XP of all users
+        let totalXP = 0;
+        for (const xp of this.userExperience.values()) {
+            totalXP += xp;
+        }
+        return totalXP;
+    }
+    
+    getXPRequiredForLevel(level) {
+        return this.getXPForLevel(level);
+    }
+    
+    // Get the highest level user (for stats display)
+    getHighestLevelUser() {
+        let highestLevel = 0;
+        let highestUser = null;
+        
+        for (const [username, level] of this.userLevels.entries()) {
+            if (level > highestLevel) {
+                highestLevel = level;
+                highestUser = username;
+            }
+        }
+        
+        return highestUser;
+    }
 }
 
 // Initialize global upgrade system
